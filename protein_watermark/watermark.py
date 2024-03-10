@@ -1,7 +1,6 @@
 import numpy as np
 from .base import AbstractReweight
 
-
 """
 Codes below are modified from unbiased watermark, 
 GitHub repo: https://github.com/xiaoniu-578fa6bff964d005/UnbiasedWatermark
@@ -99,21 +98,31 @@ class WatermarkLogitsProcessor:
         else:
             return np.where(mask[:, None], logits, reweighted_logits)
 
+
 class WatermarkDetector:
     def __init__(
             self,
             private_key: any,
-            context_code_length: int,
             reweight: AbstractReweight,
+            context_code_length: int,
             vocab_size: int = 20,
+            ignore_history: bool = False
     ):
         self.private_key = private_key
         self.cc_length = context_code_length
         self.vocab_size = vocab_size
         self.reweight = reweight
+        self.ignore_history = ignore_history
+        self.cc_history = set()
 
-    def get_rng_seed(self, context_code: str) -> any:
+    def reset_history(self):
+        self.cc_history = set()
+
+    def get_rng_seed(self, context_code: any) -> any:
+        if not self.ignore_history:
+            self.cc_history.add(context_code)
         import hashlib
+
         m = hashlib.sha256()
         m.update(context_code)
         m.update(self.private_key)
@@ -122,21 +131,51 @@ class WatermarkDetector:
         return seed
 
     def _get_codes(self, context):
-        context_code = context[-self.cc_length:]
-        return self.get_rng_seed(context_code)
+        batch_size = len(context)
+
+        context_codes = [
+            context[i][-self.cc_length:].tobytes() for i in range(batch_size)
+        ]
+
+        mask, seeds = zip(
+            *[
+                (context_code in self.cc_history, self.get_rng_seed(context_code))
+                for context_code in context_codes
+            ]
+        )
+        return mask, seeds
 
     def detect(self,
                input_ids: np.ndarray):
         """
         :param input_ids: sequences after tokenization
-        :return:
+        :return: scores, a higher score means a seq is likely to be watermarked
         """
+
         scores = []
-        for i, _ in enumerate(input_ids):
-            seed = self._get_codes(input_ids[:i])
-            rng = np.random.default_rng(seed)
-            watermark_code = self.reweight.watermark_code_type.from_random(rng, self.vocab_size)
-            score = self.reweight.get_la_score(watermark_code)
-            ...
+        for i in range(input_ids.shape[1]):
+            score = self.get_la_score(input_ids[:, :i], input_ids[:, i], self.vocab_size)
             scores.append(score)
-        return np.mean(score)
+
+        scores = np.array(scores)
+        return np.sum(scores, axis=0)
+
+    def get_la_score(
+            self,
+            input_ids: np.ndarray,
+            labels: np.ndarray,
+            vocab_size: int,
+    ) -> np.ndarray:
+        assert "get_la_score" in dir(
+            self.reweight
+        ), "Reweight does not support likelihood agnostic detection"
+        mask, seeds = self._get_codes(input_ids)
+        rng = [
+            np.random.default_rng(seed) for seed in seeds
+        ]
+        mask = np.array(mask)
+        watermark_code = self.reweight.watermark_code_type.from_random(rng, vocab_size)
+        all_scores = self.reweight.get_la_score(watermark_code)
+        scores = all_scores[np.arange(all_scores.shape[0]), labels]
+        scores = np.logical_not(mask) * scores
+        return scores
