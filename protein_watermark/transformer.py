@@ -3,6 +3,13 @@ import numpy as np
 from .base import AbstractReweight
 from transformers import LogitsProcessor
 
+
+"""
+Codes below are modified from unbiased watermark, 
+GitHub repo: https://github.com/xiaoniu-578fa6bff964d005/UnbiasedWatermark
+Original work: https://arxiv.org/pdf/2310.10669 by Zhengmian HU et al.
+"""
+
 class WatermarkLogitsProcessor(LogitsProcessor):
     def __init__(
             self,

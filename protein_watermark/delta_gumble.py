@@ -2,6 +2,12 @@ import numpy as np
 from typing import Union
 from .base import AbstractReweight, AbstractWatermarkCode
 
+"""
+Codes below are modified from unbiased watermark, 
+GitHub repo: https://github.com/xiaoniu-578fa6bff964d005/UnbiasedWatermark
+Original work: https://arxiv.org/pdf/2310.10669 by Zhengmian HU et al.
+"""
+
 def get_gumbel_variables(rng: np.random.Generator,
                          vocab_size: int):
     u = rng.random((vocab_size,))  # ~ Unifom(0, 1)
