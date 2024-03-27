@@ -10,7 +10,7 @@ GitHub repo: https://github.com/xiaoniu-578fa6bff964d005/UnbiasedWatermark
 Original work: https://arxiv.org/pdf/2310.10669 by Zhengmian HU et al.
 """
 
-class WatermarkLogitsProcessor(LogitsProcessor):
+class transformerWatermarkLogitsProcessor(LogitsProcessor):
     def __init__(
             self,
             private_key: any,

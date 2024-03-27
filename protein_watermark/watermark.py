@@ -155,10 +155,33 @@ class WatermarkDetector:
         scores = []
         for i in range(input_ids.shape[1]):
             score = self.get_la_score(input_ids[:, :i], input_ids[:, i], self.vocab_size)
-            scores.append(score)
 
-        scores = np.array(scores)
-        return np.sum(scores, axis=0)
+            ti = score - np.log(2)
+            scores.append(ti)
+        assert np.all(ti <= 0), ti
+        tis = np.array(scores)
+        uis = np.exp(tis)
+        Ubar = np.mean(uis)
+        print("Ubar", Ubar)
+
+        if Ubar <= 0.5:
+            final_score = 0
+            final_p_value = 1
+            return final_score, final_p_value
+        avgS = lambda Ubar, lamb: Ubar * lamb + np.log(lamb / np.expm1(lamb))
+        import scipy.optimize
+        sol = scipy.optimize.minimize(lambda l: -avgS(Ubar, l), 0.5, bounds=[(0, 10)])
+        final_score = -sol.fun * input_ids.shape[1]
+        final_p_value = np.exp(-final_score)
+        return final_score, final_p_value
+
+        A = np.mean(tis)
+        final_score = (-1 - A - np.log(-A)) * input_ids.shape[1]
+        final_p_value = np.exp(-final_score)
+
+        print("optimal score is", final_score)
+        print("optimal p-value is", final_p_value)
+        return final_score, final_p_value
 
     def get_la_score(
             self,

@@ -1,0 +1,1 @@
+bash ./download_script.sh -f monomersFrom2021Jul22to2024Mar22.txt -o ./inputs/PDB_monomers/pdbs/ -p
