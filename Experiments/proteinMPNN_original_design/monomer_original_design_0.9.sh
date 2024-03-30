@@ -1,8 +1,8 @@
 #!/bin/bash
 
-folder_with_pdbs="../inputs/selected_monomers/"
+folder_with_pdbs="../inputs/sampled_monomers/"
 
-output_dir="../outputs/monomer_original_0.1"
+output_dir="../outputs/monomer_original_0.9"
 if [ ! -d $output_dir ]
 then
     mkdir -p $output_dir
@@ -16,6 +16,6 @@ python ../protein_mpnn_run.py \
         --jsonl_path $path_for_parsed_chains \
         --out_folder $output_dir \
         --num_seq_per_target 50 \
-        --sampling_temp "0.1" \
+        --sampling_temp "0.9" \
         --seed 37 \
         --batch_size 1
