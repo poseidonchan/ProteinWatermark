@@ -13,6 +13,21 @@ import torch.nn.functional as F
 import random
 import itertools
 
+######################################
+### IMPORT WATERMARK PACKAGE #########
+######################################
+from proteinwatermark import (
+    DeltaGumbel_Reweight,
+    WatermarkLogitsProcessor,
+)
+
+delta_wp = WatermarkLogitsProcessor(
+    b"private key",
+    DeltaGumbel_Reweight(),
+    context_code_length=5,
+)
+######################################
+
 #A number of functions/classes are adopted from: https://github.com/jingraham/neurips19-graph-protein-design
 
 def parse_fasta(filename,limit=-1, omit=[]):
@@ -1116,7 +1131,13 @@ class ProteinMPNN(nn.Module):
 
         # Decoder uses masked self-attention
         chain_mask = chain_mask*chain_M_pos*mask #update chain_M to include missing regions
-        decoding_order = torch.argsort((chain_mask+0.0001)*(torch.abs(randn))) #[numbers will be smaller for places where chain_M = 0.0 and higher for places where chain_M = 1.0]
+        # decoding_order = torch.argsort((chain_mask+0.0001)*(torch.abs(randn))) #[numbers will be smaller for places where chain_M = 0.0 and higher for places where chain_M = 1.0]
+
+        ###########################################
+        ### DECODING ORDER SHOULD NOT BE RANDOM ###
+        decoding_order = torch.argsort(chain_mask)
+        ###########################################
+        
         mask_size = E_idx.shape[1]
         permutation_matrix_reverse = torch.nn.functional.one_hot(decoding_order, num_classes=mask_size).float()
         order_mask_backward = torch.einsum('ij, biq, bjp->bqp',(1-torch.triu(torch.ones(mask_size,mask_size, device=device))), permutation_matrix_reverse, permutation_matrix_reverse)
@@ -1145,12 +1166,9 @@ class ProteinMPNN(nn.Module):
         
         for t_ in range(N_nodes):
             t = decoding_order[:,t_] #[B]
-            
-            chain_mask_gathered = torch.gather(chain_mask, 1, t[:,None]) #[B, 1]
-            
+            chain_mask_gathered = torch.gather(chain_mask, 1, t[:,None]) #[B]
             mask_gathered = torch.gather(mask, 1, t[:,None]) #[B]
             bias_by_res_gathered = torch.gather(bias_by_res, 1, t[:,None,None].repeat(1,1,21))[:,0,:] #[B, 21]
-            
             if (mask_gathered==0).all(): #for padded or missing regions only
                 S_t = torch.gather(S_true, 1, t[:,None])
             else:
@@ -1169,15 +1187,26 @@ class ProteinMPNN(nn.Module):
                 # Sampling step
                 h_V_t = torch.gather(h_V_stack[-1], 1, t[:,None,None].repeat(1,1,h_V_stack[-1].shape[-1]))[:,0]
                 logits = self.W_out(h_V_t) / temperature
-                
-                logits = logits-constant[None,:]*1e8+constant_bias[None,:]/temperature+bias_by_res_gathered/temperature
 
-                
-                probs = F.softmax(logits, dim=-1)
-                # print("probability", probs)
+                #################################################################
+                ### RECORD ENTROPY FIRST ########################################
+                probs = torch.softmax(logits, dim=-1)
                 entropy = -torch.sum(torch.log(probs+1e-8)*(probs++1e-8), dim=-1)
                 entropy_list.append(entropy)
+                #################################################################
+
+                logits = logits-constant[None,:]*1e8+constant_bias[None,:]/temperature+bias_by_res_gathered/temperature # logits mofification
+                #################################################################
+                ### MODIFY THE LOGITS TO ADD WATERMARK ##########################
+                S_record = S.detach().cpu().numpy() # CURRENT GENERATED SEQUENCES
                 
+                logits = delta_wp("order_agnoistic", # since it is proteinMPNN
+                                  S_record, # current sequences
+                                  logits.detach().cpu().numpy(),
+                                  current_pos=t.long().detach().cpu())
+                logits = torch.FloatTensor(logits).to(device)
+                #################################################################
+                probs = F.softmax(logits, dim=-1)
                 
                 if pssm_bias_flag:
                     pssm_coef_gathered = torch.gather(pssm_coef, 1, t[:,None])[:,0]
@@ -1195,19 +1224,15 @@ class ProteinMPNN(nn.Module):
                 S_t = torch.multinomial(probs, 1)
                 all_probs.scatter_(1, t[:,None,None].repeat(1,1,21), (chain_mask_gathered[:,:,None,]*probs[:,None,:]).float())
             S_true_gathered = torch.gather(S_true, 1, t[:,None])
-            
             S_t = (S_t*chain_mask_gathered+S_true_gathered*(1.0-chain_mask_gathered)).long()
             temp1 = self.W_s(S_t)
             h_S.scatter_(1, t[:,None,None].repeat(1,1,temp1.shape[-1]), temp1)
             S.scatter_(1, t[:,None], S_t)
-            
-        output_dict = {"S": S, "probs": all_probs, "decoding_order": decoding_order}
-
         print("average entropy", sum(entropy_list)/len(entropy_list))
         with open("./entropy_temperature.txt", 'a') as file:
             # Write the value to the file followed by a newline character
             file.write("Temperature: "+ str(temperature) + " Average Entropy: " + str((sum(entropy_list)/len(entropy_list)).item()) + '\n')
-        
+        output_dict = {"S": S, "probs": all_probs, "decoding_order": decoding_order}
         return output_dict
 
 
