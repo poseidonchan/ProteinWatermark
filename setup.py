@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 setup(
-    name = 'pr_watermark',
+    name = 'protein-watermark',
     version = '0.1',
     description = 'adding watermark to generative protein design models',
     author = 'Yanshuo Chen',
