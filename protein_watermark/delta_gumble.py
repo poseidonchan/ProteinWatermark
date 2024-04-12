@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Union
+from typing import Union, List
 from .base import AbstractReweight, AbstractWatermarkCode
 
 """
@@ -23,7 +23,7 @@ class DeltaGumbel_WatermarkCode(AbstractWatermarkCode):
     @classmethod
     def from_random(
             cls,
-            rng: Union[np.random.Generator, list[np.random.Generator]],
+            rng: Union[np.random.Generator, List[np.random.Generator]],
             vocab_size: int,
     ):
         if isinstance(rng, list):

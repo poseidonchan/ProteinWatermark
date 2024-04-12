@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, List, Type
 import numpy as np
 
 from abc import ABC, abstractmethod
@@ -13,13 +13,13 @@ class AbstractWatermarkCode(ABC):
     @classmethod
     @abstractmethod
     def from_random(cls,
-                    rng: Union[np.random.Generator, list[np.random.Generator]],
+                    rng: Union[np.random.Generator, List[np.random.Generator]],
                     vocab_size: int):
         pass
 
 
 class AbstractReweight(ABC):
-    watermark_code_type: type[AbstractWatermarkCode]
+    watermark_code_type: Type[AbstractWatermarkCode]
 
     @abstractmethod
     def reweight(self,

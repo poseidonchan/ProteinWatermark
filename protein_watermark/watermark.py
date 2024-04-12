@@ -1,5 +1,6 @@
 import numpy as np
 from .base import AbstractReweight
+import scipy.optimize
 
 """
 Codes below are modified from unbiased watermark, 
@@ -169,18 +170,9 @@ class WatermarkDetector:
             final_p_value = 1
             return final_score, final_p_value
         avgS = lambda Ubar, lamb: Ubar * lamb + np.log(lamb / np.expm1(lamb))
-        import scipy.optimize
         sol = scipy.optimize.minimize(lambda l: -avgS(Ubar, l), 0.5, bounds=[(0, 10)])
         final_score = -sol.fun * input_ids.shape[1]
         final_p_value = np.exp(-final_score)
-        return final_score, final_p_value
-
-        A = np.mean(tis)
-        final_score = (-1 - A - np.log(-A)) * input_ids.shape[1]
-        final_p_value = np.exp(-final_score)
-
-        print("optimal score is", final_score)
-        print("optimal p-value is", final_p_value)
         return final_score, final_p_value
 
     def get_la_score(
