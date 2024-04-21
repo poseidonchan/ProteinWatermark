@@ -15,6 +15,16 @@ Compared to the conventional biosecurity regulation method proposed/mentioned in
 
 ### ProteinMPNN (autoregressive model)
 
+Adding watermarks to autoregressive model is direct. We just need to modify the logit sampled at each step and then sample residue from the modified distribution. Detailed tutorial is available in the [tutorial folder](https://github.com/poseidonchan/ProteinWatermark/tree/main/tutorials/ProteinMPNN).
+
 ### Protein Generator (diffusion model)
 
+For the difussion models, we tested it and found that the entropy is really low in later difussion steps. That means the it is very how to effectively add watermarks in the sequences as the sequences are almost deterministic in the difussion models. 
+![fig2](https://github.com/poseidonchan/ProteinWatermark/tree/main/Experiments/protein_generator/protein_generator_behavior.png)
+To solve this problem, we can actually run the difussion model for a task many times (around 20,000 times), save all the best generations, and then use these sequences to finetune a protein language model ***(i.e. use another probabilistic model to fit the probability space of a specific design problem***). After that, we can use the watermark framework to add watermarks in the fintuned protein language model and get a watermarked protein design. ***This part is still under construction***, more alternatives could be proposed to solve this problem.
+
 ## Issues
+
+Feel free to raise issues!
+
+You can also contact me through my [email](cys@umd.edu)!
