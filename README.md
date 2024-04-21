@@ -13,9 +13,13 @@ Compared to the conventional biosecurity regulation method proposed/mentioned in
 
 ## Examples
 
-### ProteinMPNN (autoregressive model)
+### ProteinMPNN & ProGen2 (autoregressive model)
 
-Adding watermarks to autoregressive model is direct. We just need to modify the logit sampled at each step and then sample residue from the modified distribution. Detailed tutorial is available in the [tutorial folder](https://github.com/poseidonchan/ProteinWatermark/tree/main/tutorials/ProteinMPNN).
+Adding watermarks to autoregressive model is direct. We just need to modify the logit sampled at each step and then sample residue from the modified distribution. Detailed tutorial for modifying ProteinMPNN is available in the [tutorial folder](./tutorials/ProteinMPNN).
+
+Besides, we provide a [notebook](./tutorials/test_example.ipynb) for users to understand the process of watermark detection. We suggest users run the test examples first to ensure the basic environment (pseudo random seed generator) is the same on their own platforms.
+
+Moreover, we also provide a [notebook](./tutorials/test_example.ipynb) for users to understand how the **WatermarkLogitsProcessor** works and the basic robustness of watermarks in a sequence. The examples used in this notebook comes from the [ProGen2](https://github.com/salesforce/progen/tree/485b2ea3db98f8d65d0cd86c2c85ae639b37a678/progen2), how to add watermarks to [transformers](https://huggingface.co/docs/transformers/en/index)-based language model is illustrated in this [folder](./tutorials/ProGen2/).
 
 ### Protein Generator (diffusion model)
 
