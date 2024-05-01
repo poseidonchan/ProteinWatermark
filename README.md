@@ -1,15 +1,55 @@
 # ProteinWatermark: 
-
 # Enhancing biosecurity in protein design
+![Apache2.0](https://img.shields.io/github/license/poseidonchan/ProteinWatermark)
 
-Compared to the conventional biosecurity regulation method proposed/mentioned in the comments given by Baker and Church ([Protein design meets biosecurity](https://www.science.org/doi/10.1126/science.ado1671), *Science*), adding watermark to the designed protein could achieve several advantages:
-- The watermarked protein is not easy to be modified to escape the tracing thus enhancing the biosecurity and IP protection. 
-- Using protein/DNA synthesizer to synthesize *de novo* proteins no longer requires researchers upload protein sequence to authority for record thus enhancing the privacy. Instead, with authority assigned private key and strictly controlled synthesizers, researcher is allowed to pass check with correct private key and corresponding watermarked sequences. 
-- The watermarked technique can be broadly applied on probabilistic based generative model easily without harming the information sharing process in the community.
+![fig1](./figure/Fig1_warm.png)
+Compared to the conventional biosecurity regulation method described in the comments given by Baker and Church (Fig1.**a**, [Protein design meets biosecurity](https://www.science.org/doi/10.1126/science.ado1671), *Science*), adding watermark (Fig1.**b,c**) to the designed protein could achieve two main advantages:
+
+- Privacy. Locally verify a watermarked sequence and then synthesize can protect the sequence information.
+- Intellectual Property (IP) protection. Researcher could claim IP of a protein based on his private key.
+
+Besides, it also has advantages:
+- Maintain the robust tracebility to deter bad actors in the community to achieve biosecurity.
+- User-friendly. It can be easily integrated to autoregressive models. For other models, it can be integrated by knowledge distillation.
 
 ## Installation
 
+We encourage users to check the source code to gain much deeper understanding of the watermarking process. 
+
+```shell
+# conda create -n your_env python=3.9 (protein watermark was tested on python 3.8 and 3.9 only)
+# conda activate your_env 
+pip install protein-watermark
+```
+
 ## Usages
+
+```python
+from protein_watermark import (
+    WatermarkLogitsProcessor, 
+    DeltaGumbel_Reweight, 
+    WatermarkDetector
+)
+
+delta_wp = WatermarkLogitsProcessor(b"private key", # input your own private key
+                                    DeltaGumbel_Reweight(), # specify the reweight function
+                                    context_code_length=5, # specify the context code length, which is related to the detection robustness, unbiasedness of watermark. Longer context code leads to worse robustness and better unbiasedness. If context code length is 5, then watermarks can be unbiasedly added 20^5 times at most.
+                                   )
+
+watermarked_logits = delta_wp(mode='normal', # normal mode and order-agnoistic mode are supported, for order-agnoistic mode, we need to specify the current position of the sequence.
+                              context, # model needs to know the cotext
+                              original_logits,
+                              current_pos,
+                             )
+detector = WatermarkDetector(b"private_key",
+                             DeltaGumbel_Reweight(),
+                             context_code_length,
+            								 vocab_size, # the vocabulary size, total number of tokens, can be set as a very large number.
+                             )
+watermark_score, p_value = detector.detect(input_ids, # sequence after tokenization. shape is (n_sample, length)
+                                          )
+# see detailed examples below
+```
 
 ## Examples
 
