@@ -65,7 +65,7 @@ Moreover, we also provide a [notebook](./tutorials/test_example.ipynb) for users
 
 For the diffusion models, we tested it and found that the entropy is really low in later diffusion steps. That means the it is **very hard** to effectively add watermarks in the sequences as the sequences are **almost deterministic** in the diffusion model final steps. ![fig2](./Experiments/protein_generator/protein_generator_behavior.png)
 
-To solve this problem, in practice, we can run thediffusion model for a task many times (around 20,000 times), save all the best generations, and then use these sequences to finetune a protein language model ***(i.e. use another probabilistic model to fit the probability space of a specific design problem***). After that, we can use the watermark framework to add watermarks in the fintuned protein language model and get a watermarked protein design. ***This part is still under construction***, more alternatives could be proposed to solve this problem.
+To solve this problem, in practice, we can run the diffusion model for a task many times (around 20,000 times), save all the best generations, and then use these sequences to finetune a protein language model ***(i.e. use another probabilistic model to fit the probability space of a specific design problem***). After that, we can use the watermark framework to add watermarks in the fintuned protein language model and get a watermarked protein design. ***This part is still under construction***, more alternatives could be proposed to solve this problem.
 
 ## Issues
 
