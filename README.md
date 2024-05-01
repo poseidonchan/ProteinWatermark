@@ -3,13 +3,13 @@
 ![Apache2.0](https://img.shields.io/github/license/poseidonchan/ProteinWatermark)
 
 ![fig1](./figure/Fig1_warm.png)
-Compared to the conventional biosecurity regulation method described in the comments given by Baker and Church (Fig1.**a**, [Protein design meets biosecurity](https://www.science.org/doi/10.1126/science.ado1671), *Science*), adding watermark (Fig1.**b,c**) to the designed protein could achieve two main advantages:
+Compared to the conventional biosecurity regulation method described in the comments given by Baker and Church (Fig1.**a**, [Protein design meets biosecurity](https://www.science.org/doi/10.1126/science.ado1671), *Science*), adding watermarks (Fig1.**b,c**) to the designed protein could achieve two main advantages:
 
 - Privacy. Locally verify a watermarked sequence and then synthesize can protect the sequence information.
 - Intellectual Property (IP) protection. Researcher could claim IP of a protein based on his private key.
 
 Besides, it also has advantages:
-- Maintain the robust tracebility to deter bad actors in the community to achieve biosecurity.
+- Robust tracebility. Which can  deter bad actors in the community to achieve biosecurity.
 - User-friendly. It can be easily integrated to autoregressive models. For other models, it can be integrated by knowledge distillation.
 
 ## Installation
@@ -65,10 +65,16 @@ Moreover, we also provide a [notebook](./tutorials/test_example.ipynb) for users
 
 For the diffusion models, we tested it and found that the entropy is really low in later diffusion steps. That means the it is **very hard** to effectively add watermarks in the sequences as the sequences are **almost deterministic** in the diffusion model final steps. ![fig2](./Experiments/protein_generator/protein_generator_behavior.png)
 
-To solve this problem, in practice, we can run the diffusion model for a task many times (around 20,000 times), save all the best generations, and then use these sequences to finetune a protein language model ***(i.e. use another probabilistic model to fit the probability space of a specific design problem***). After that, we can use the watermark framework to add watermarks in the fintuned protein language model and get a watermarked protein design. ***This part is still under construction***, more alternatives could be proposed to solve this problem.
+To solve this problem, in practice, we can run the diffusion model for a task many times (around 20,000 times), save all the best generations, and then use these sequences to finetune a protein language model ***(i.e. knowledge distillation)***. After that, we can use the watermark framework to add watermarks in the fintuned protein language model and get a watermarked protein design. ***This part is still under construction***, more alternatives could be proposed to solve this problem.
 
 ## Issues
 
 Feel free to raise issues!
 
 You can also contact me through my [email](cys@umd.edu)!
+
+## Experiments
+All the experiments are deposited in the [Experiments folder](./Experiments), you can reproduce the results after setting up your own watermarked ProteinMPNN model.
+
+## Citation
+
