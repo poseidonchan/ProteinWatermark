@@ -1,5 +1,5 @@
 # ProteinWatermark: 
-# Enhancing biosecurity in protein design
+# Enhancing privacy in secured protein design
 ![Apache2.0](https://img.shields.io/github/license/poseidonchan/ProteinWatermark)
 
 ![fig1](./figure/Fig1_warm.png)
