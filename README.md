@@ -78,3 +78,13 @@ All the experiments are deposited in the [Experiments folder](./Experiments), yo
 
 ## Citation
 
+```tex
+@article{ProteinWatermark,
+  title={Enhancing Biosecurity with Watermarked Protein Design},
+  author={Chen, Yanshuo and Hu, Zhengmian and Wu, Yihan and Chen, Ruibo and Jin, Yongrui and Chen, Wei and Huang, Heng},
+  journal={bioRxiv},
+  pages={2024--05},
+  year={2024},
+  publisher={Cold Spring Harbor Laboratory}
+}
+```
