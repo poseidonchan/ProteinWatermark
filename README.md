@@ -1,7 +1,5 @@
 # ProteinWatermark: 
 # Enhancing privacy in secured protein design
-![Apache2.0](https://img.shields.io/github/license/poseidonchan/ProteinWatermark)
-
 ![fig1](./figure/Fig1_warm.png)
 Compared to the conventional biosecurity regulation method described in the comments given by Baker and Church (Fig1.**a**, [Protein design meets biosecurity](https://www.science.org/doi/10.1126/science.ado1671), *Science*), adding watermarks (Fig1.**b,c**) to the designed protein could achieve two main advantages:
 
