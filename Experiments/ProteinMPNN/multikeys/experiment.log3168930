@@ -1,0 +1,30 @@
+Total negative cases (true_key != detect_key): 9990000
+Number of false positives (p_value < 0.001): 1070
+False positive ratio: 0.000107
+Total positive cases (true_key == detect_key): 10000
+Number of false negatives (p_value >= 0.001): 22
+False negative rate: 0.002200
+Watermark Scores of False Negative Samples:
+86789      6.532531
+319815     5.578778
+403825     6.517470
+2189023    4.353191
+2829094    2.061155
+3379710    6.052994
+5248363    6.055201
+5359375    5.764180
+5414382    6.304000
+5416382    6.789741
+5531395    5.732977
+5565398    6.364333
+5598402    3.291245
+6086567    6.883691
+6096569    5.929021
+6579621    5.431009
+7596291    4.681314
+7828316    6.605791
+8458164    6.642301
+8536173    4.309952
+8787200    6.025849
+9348334    5.283845
+Name: final_score, dtype: float64
